@@ -1,4 +1,4 @@
-# IPL 2027 Prediction & Simulation Platform 🏏
+# IPL 2027 Prediction & Simulation Platform 
 
 This project explores how machine learning and historical cricket data can be used to estimate team performance in the 2027 Indian Premier League (IPL).
 
