@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IPL 2027 Season Forecast — Pre-Auction Model (2008–2026)</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    --brand: #1d4ed8;
+    --brand-subtle: #eff6ff;
+    --bar-fill: #2563eb;
+    --bar-bg: #f1f5f9;
+    --pos: #15803d;
+    --neg: #b91c1c;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .topbar strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  .page-header {
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+  }
+
+  .page-header h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .page-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-top: 6px;
+    max-width: 680px;
+  }
+
+  .meta-strip {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 4px;
+  }
+
+  .meta-strip div span {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .meta-strip div strong {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 920px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 24px;
+  }
+
+  .panel-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .panel-head h2 {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+
+  .panel-body {
+    padding: 18px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-strong);
+    background: #fcfcfd;
+  }
+
+  th.num, td.num {
+    text-align: right;
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    color: var(--text);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background-color: #f8fafc;
+  }
+
+  tr.playoff-cutoff td {
+    border-bottom: 2px dashed var(--border-strong);
+  }
+
+  .rank-cell {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    color: var(--text-muted);
+    font-size: 12px;
+    width: 36px;
+  }
+
+  .team-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+  }
+
+  .team-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .team-sub {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+
+  .mono {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 13px;
+  }
+
+  .prob-cell {
+    width: 150px;
+  }
+
+  .prob-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .prob-bar-bg {
+    width: 72px;
+    height: 6px;
+    background: var(--bar-bg);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .prob-bar-fill {
+    height: 100%;
+    background: var(--bar-fill);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 6px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-secondary);
+    background: #f9fafb;
+  }
+
+  .controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  button {
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    transition: background 0.12s;
+  }
+
+  button:hover {
+    background: #f3f4f6;
+  }
+
+  button.btn-primary {
+    background: var(--text);
+    color: #ffffff;
+    border-color: var(--text);
+  }
+
+  button.btn-primary:hover {
+    background: #374151;
+  }
+
+  .status-note {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--brand-subtle);
+    border-left: 3px solid var(--brand);
+    font-size: 12.5px;
+    color: #1e3a8a;
+  }
+
+  .h2h-result {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .h2h-nums {
+    display: flex;
+    justify-content: space-between;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .h2h-meter {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .footnote {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    background: #fcfcfd;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div><strong>CRICKET ANALYTICS LAB</strong> &nbsp;/&nbsp; IPL 2027 Pre-Auction Projection Model</div>
+  <div>Dataset: <strong>2008–2026 (1,243 Matches)</strong> &nbsp;|&nbsp; SQLite + Calibrated GBM</div>
+</div>
+
+<div class="wrap">
+  <header class="page-header">
+    <div>
+      <h1>2027 Indian Premier League Forecast</h1>
+      <p>
+        Championship and playoff probabilities derived from 5,000 Monte Carlo tournament simulations.
+        Team ratings combine 19-season historical Elo (2008–2026) with recency-weighted (&lambda; = 0.82) player phase splits.
+      </p>
+    </div>
+    <div class="meta-strip">
+      <div>
+        <span>Holdout Accuracy</span>
+        <strong>79.12%</strong>
+      </div>
+      <div>
+        <span>ROC-AUC</span>
+        <strong>0.8647</strong>
+      </div>
+      <div>
+        <span>Brier Score</span>
+        <strong>0.1522</strong>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Left Column: Main Standings Table -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Simulated 2027 League Table &amp; Playoff Odds</h2>
+        <button onclick="runMonteCarlo(false)">Re-run 5,000 sims</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Rk</th>
+            <th>Club</th>
+            <th class="num">08–26 W</th>
+            <th>2026 Finish</th>
+            <th class="num">Proj. W</th>
+            <th class="num">Playoffs</th>
+            <th class="num">Final</th>
+            <th class="num">Win Title</th>
+          </tr>
+        </thead>
+        <tbody id="standingsBody"></tbody>
+      </table>
+      <div class="footnote">
+        Dashed line indicates top-4 playoff qualification cutoff. Projected wins out of 14 league fixtures.
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Tools & Feature Weights -->
+    <div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Roster Transfer Sandbox</h2>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--text-secondary); font-size:13px; margin-bottom:12px;">
+            Test how moving a marquee player ahead of the December 2026 mini-auction shifts team strength vectors and 2027 title odds.
+          </p>
+          <div class="controls-grid">
+            <div>
+              <label for="playerSelect">Select Player</label>
+              <select id="playerSelect"></select>
+            </div>
+            <div>
+              <label for="targetTeamSelect">Destination Club</label>
+              <select id="targetTeamSelect"></select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-primary" onclick="executeTrade()">Apply Transfer</button>
+            <button onclick="resetRosters()">Reset Default Squads</button>
+          </div>
+          <div class="status-note" id="tradeLog">
+            Showing baseline 2008–2026 historical projection (synced with Python output).
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Single-Match Win Probability</h2>
+        </div>
+        <div class="panel-body">
+          <div class="controls-grid">
+            <div>
+              <label for="matchTeamA">Home / Team A</label>
+              <select id="matchTeamA" onchange="calcHeadToHead()"></select>
+            </div>
+            <div>
+              <label for="matchTeamB">Away / Team B</label>
+              <select id="matchTeamB" onchange="calcHeadToHead()"></select>
+            </div>
+          </div>
+          <div class="h2h-result" id="h2hOutput"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Model Feature Weights (GBM)</h2>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Engineered Feature</th>
+              <th class="num">Relative Weight</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Historical Elo Differential (2008–2026)</td>
+              <td class="num mono">35.0%</td>
+            </tr>
+            <tr>
+              <td>Top-5 Bowling WAR Differential</td>
+              <td class="num mono">14.5%</td>
+            </tr>
+            <tr>
+              <td>Top-7 Batting RAA Differential</td>
+              <td class="num mono">12.4%</td>
+            </tr>
+            <tr>
+              <td>Death-Overs Batting SR (Overs 16–20)</td>
+              <td class="num mono">7.3%</td>
+            </tr>
+            <tr>
+              <td>Death-Overs Bowling Economy (Overs 16–20)</td>
+              <td class="num mono">5.7%</td>
+            </tr>
+            <tr>
+              <td>Middle-Overs Batting SR (Overs 7–15)</td>
+              <td class="num mono">4.7%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TEAM_META = {
+  GT:   { name: "Gujarat Titans",         color: "#1e3a8a", winsAllTime: 47,  rank2026: "2nd (Finalist)", baseRating: 93.4, baseWins: 8.28, basePlayoff: 71.7, baseFinal: 46.3, baseTitle: 26.5 },
+  RCB:  { name: "Royal Challengers",      color: "#dc2626", winsAllTime: 134, rank2026: "1st (Champion)", baseRating: 93.1, baseWins: 8.24, basePlayoff: 71.4, baseFinal: 44.7, baseTitle: 25.0 },
+  SRH:  { name: "Sunrisers Hyderabad",    color: "#ea580c", winsAllTime: 102, rank2026: "3rd (Playoffs)", baseRating: 90.2, baseWins: 7.80, basePlayoff: 59.6, baseFinal: 31.7, baseTitle: 15.1 },
+  CSK:  { name: "Chennai Super Kings",    color: "#ca8a04", winsAllTime: 148, rank2026: "6th",            baseRating: 88.5, baseWins: 7.59, basePlayoff: 53.4, baseFinal: 24.1, baseTitle: 10.8 },
+  RR:   { name: "Rajasthan Royals",       color: "#db2777", winsAllTime: 123, rank2026: "4th (Playoffs)", baseRating: 87.2, baseWins: 7.34, basePlayoff: 45.3, baseFinal: 20.0, baseTitle: 8.7  },
+  MI:   { name: "Mumbai Indians",         color: "#2563eb", winsAllTime: 155, rank2026: "5th",            baseRating: 85.8, baseWins: 7.03, basePlayoff: 36.5, baseFinal: 15.4, baseTitle: 6.8  },
+  KKR:  { name: "Kolkata Knight Riders",  color: "#6d28d9", winsAllTime: 140, rank2026: "7th",            baseRating: 81.6, baseWins: 6.36, basePlayoff: 21.6, baseFinal: 6.7,  baseTitle: 2.8  },
+  DC:   { name: "Delhi Capitals",         color: "#0284c7", winsAllTime: 125, rank2026: "8th",            baseRating: 81.2, baseWins: 6.34, basePlayoff: 20.7, baseFinal: 5.7,  baseTitle: 2.3  },
+  LSG:  { name: "Lucknow Super Giants",   color: "#0d9488", winsAllTime: 39,  rank2026: "10th",           baseRating: 77.8, baseWins: 5.65, basePlayoff: 11.2, baseFinal: 2.9,  baseTitle: 1.1  },
+  PBKS: { name: "Punjab Kings",           color: "#b91c1c", winsAllTime: 118, rank2026: "9th",            baseRating: 76.9, baseWins: 5.37, basePlayoff: 8.6,  baseFinal: 2.5,  baseTitle: 1.0  }
+};
+
+const INITIAL_PLAYERS = [
+  { name: "Rashid Khan", team: "GT", role: "All-Rounder", raa: 15.5, war: 33.5 },
+  { name: "Shubman Gill", team: "GT", role: "Batter", raa: 31.5, war: 0.0 },
+  { name: "Jos Buttler", team: "GT", role: "WK-Batter", raa: 30.5, war: 0.0 },
+  { name: "Kagiso Rabada", team: "GT", role: "Bowler", raa: 2.5, war: 25.0 },
+  { name: "Virat Kohli", team: "RCB", role: "Batter", raa: 34.5, war: 0.0 },
+  { name: "Josh Hazlewood", team: "RCB", role: "Bowler", raa: 1.5, war: 30.0 },
+  { name: "Phil Salt", team: "RCB", role: "WK-Batter", raa: 28.5, war: 0.0 },
+  { name: "Bhuvneshwar Kumar", team: "RCB", role: "Bowler", raa: 3.0, war: 26.5 },
+  { name: "Rajat Patidar", team: "RCB", role: "Batter", raa: 27.5, war: 0.0 },
+  { name: "Travis Head", team: "SRH", role: "Batter", raa: 31.5, war: 3.0 },
+  { name: "Heinrich Klaasen", team: "SRH", role: "WK-Batter", raa: 33.5, war: 0.0 },
+  { name: "Pat Cummins", team: "SRH", role: "All-Rounder", raa: 12.0, war: 25.0 },
+  { name: "Abhishek Sharma", team: "SRH", role: "All-Rounder", raa: 29.0, war: 10.5 },
+  { name: "Jasprit Bumrah", team: "MI", role: "Bowler", raa: 1.5, war: 36.5 },
+  { name: "Suryakumar Yadav", team: "MI", role: "Batter", raa: 34.0, war: 0.0 },
+  { name: "Hardik Pandya", team: "MI", role: "All-Rounder", raa: 22.0, war: 16.5 },
+  { name: "Trent Boult", team: "MI", role: "Bowler", raa: 2.0, war: 24.0 },
+  { name: "Ruturaj Gaikwad", team: "CSK", role: "Batter", raa: 28.5, war: 0.0 },
+  { name: "Ravindra Jadeja", team: "CSK", role: "All-Rounder", raa: 18.5, war: 22.5 },
+  { name: "Matheesha Pathirana", team: "CSK", role: "Bowler", raa: 0.5, war: 29.0 },
+  { name: "Yashasvi Jaiswal", team: "RR", role: "Batter", raa: 30.0, war: 0.0 },
+  { name: "Sanju Samson", team: "RR", role: "WK-Batter", raa: 28.5, war: 0.0 },
+  { name: "Jofra Archer", team: "RR", role: "Bowler", raa: 4.5, war: 26.0 },
+  { name: "Sunil Narine", team: "KKR", role: "All-Rounder", raa: 19.5, war: 28.5 },
+  { name: "Andre Russell", team: "KKR", role: "All-Rounder", raa: 23.5, war: 16.5 },
+  { name: "Varun Chakaravarthy", team: "KKR", role: "Bowler", raa: 0.5, war: 27.0 },
+  { name: "Axar Patel", team: "DC", role: "All-Rounder", raa: 19.5, war: 24.0 },
+  { name: "Kuldeep Yadav", team: "DC", role: "Bowler", raa: 2.0, war: 26.0 },
+  { name: "KL Rahul", team: "DC", role: "WK-Batter", raa: 26.0, war: 0.0 },
+  { name: "Nicholas Pooran", team: "LSG", role: "WK-Batter", raa: 29.5, war: 0.0 },
+  { name: "Rishabh Pant", team: "LSG", role: "WK-Batter", raa: 26.5, war: 0.0 },
+  { name: "Arshdeep Singh", team: "PBKS", role: "Bowler", raa: 1.5, war: 25.0 },
+  { name: "Shreyas Iyer", team: "PBKS", role: "Batter", raa: 24.5, war: 0.0 }
+];
+
+let players = JSON.parse(JSON.stringify(INITIAL_PLAYERS));
+const TEAMS = Object.keys(TEAM_META);
+let hasTraded = false;
+
+function getTeamStrengths() {
+  const scores = {};
+  TEAMS.forEach(t => scores[t] = TEAM_META[t].baseRating);
+  players.forEach((p, idx) => {
+    const origTeam = INITIAL_PLAYERS[idx].team;
+    if (p.team !== origTeam) {
+      const impact = (p.raa * 0.14) + (p.war * 0.18);
+      scores[origTeam] -= impact;
+      scores[p.team] += impact;
+    }
+  });
+  return scores;
+}
+
+function winProb(teamA, teamB, strengths) {
+  const diff = strengths[teamA] - strengths[teamB];
+  const p = 1 / (1 + Math.exp(-0.082 * diff));
+  return Math.max(0.36, Math.min(0.64, p));
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById("standingsBody");
+  tbody.innerHTML = rows.map((r, i) => {
+    const meta = TEAM_META[r.team];
+    const cutoffClass = (i === 3) ? "playoff-cutoff" : "";
+    return `
+      <tr class="${cutoffClass}">
+        <td class="rank-cell">${i + 1}</td>
+        <td>
+          <div class="team-cell">
+            <span class="team-dot" style="background:${meta.color}"></span>
+            <span>${r.team}</span>
+            <span class="team-sub">${meta.name}</span>
+          </div>
+        </td>
+        <td class="num mono">${meta.winsAllTime}</td>
+        <td><span class="tag">${meta.rank2026}</span></td>
+        <td class="num mono">${r.wins}</td>
+        <td class="num mono">${r.playoff}%</td>
+        <td class="num mono">${r.final}%</td>
+        <td class="num prob-cell">
+          <div class="prob-wrap">
+            <strong class="mono">${r.title}%</strong>
+            <div class="prob-bar-bg">
+              <div class="prob-bar-fill" style="width:${Math.min(100, r.title * 3.1)}%"></div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function runMonteCarlo(useExactBaseline = false) {
+  if (useExactBaseline && !hasTraded) {
+    const exactRows = TEAMS.map(t => ({
+      team: t,
+      wins: TEAM_META[t].baseWins.toFixed(2),
+      playoff: TEAM_META[t].basePlayoff.toFixed(1),
+      final: TEAM_META[t].baseFinal.toFixed(1),
+      title: TEAM_META[t].baseTitle.toFixed(1)
+    })).sort((a, b) => parseFloat(b.title) - parseFloat(a.title));
+    renderTable(exactRows);
+    calcHeadToHead();
+    return;
+  }
+
+  const strengths = getTeamStrengths();
+  const N = 5000;
+  const stats = {};
+  TEAMS.forEach(t => stats[t] = { wins: 0, playoffs: 0, finals: 0, titles: 0 });
+
+  for (let s = 0; s < N; s++) {
+    const w = {};
+    TEAMS.forEach(t => w[t] = 0);
+
+    for (let i = 0; i < TEAMS.length; i++) {
+      for (let j = i + 1; j < TEAMS.length; j++) {
+        const tA = TEAMS[i], tB = TEAMS[j];
+        const pA = winProb(tA, tB, strengths);
+        if (Math.random() < pA) w[tA]++; else w[tB]++;
+        if ((i + j) % 2 === 0) {
+          if (Math.random() < pA) w[tA]++; else w[tB]++;
+        }
+      }
+    }
+
+    TEAMS.forEach(t => stats[t].wins += w[t]);
+    const sorted = [...TEAMS].sort((a, b) => (w[b] - w[a]) || (Math.random() - 0.5));
+    const top4 = sorted.slice(0, 4);
+    top4.forEach(t => stats[t].playoffs++);
+
+    const q1W = Math.random() < winProb(top4[0], top4[1], strengths) ? top4[0] : top4[1];
+    const q1L = q1W === top4[0] ? top4[1] : top4[0];
+    const elimW = Math.random() < winProb(top4[2], top4[3], strengths) ? top4[2] : top4[3];
+    const q2W = Math.random() < winProb(q1L, elimW, strengths) ? q1L : elimW;
+
+    stats[q1W].finals++;
+    stats[q2W].finals++;
+
+    const champ = Math.random() < winProb(q1W, q2W, strengths) ? q1W : q2W;
+    stats[champ].titles++;
+  }
+
+  const rows = TEAMS.map(t => ({
+    team: t,
+    wins: (stats[t].wins / N).toFixed(2),
+    playoff: ((stats[t].playoffs / N) * 100).toFixed(1),
+    final: ((stats[t].finals / N) * 100).toFixed(1),
+    title: ((stats[t].titles / N) * 100).toFixed(1)
+  })).sort((a, b) => parseFloat(b.title) - parseFloat(a.title));
+
+  renderTable(rows);
+  calcHeadToHead();
+}
+
+function populateDropdowns() {
+  const pSel = document.getElementById("playerSelect");
+  pSel.innerHTML = players.map((p, idx) => `<option value="${idx}">${p.name} (${p.team})</option>`).join("");
+
+  const tSel = document.getElementById("targetTeamSelect");
+  tSel.innerHTML = TEAMS.map(t => `<option value="${t}">${t} — ${TEAM_META[t].name}</option>`).join("");
+
+  const mA = document.getElementById("matchTeamA");
+  const mB = document.getElementById("matchTeamB");
+  if (!mA.value) {
+    mA.innerHTML = TEAMS.map(t => `<option value="${t}">${t} (${TEAM_META[t].name})</option>`).join("");
+    mB.innerHTML = TEAMS.map(t => `<option value="${t}">${t} (${TEAM_META[t].name})</option>`).join("");
+    mA.value = "GT";
+    mB.value = "RCB";
+  }
+}
+
+function executeTrade() {
+  const idx = parseInt(document.getElementById("playerSelect").value, 10);
+  const target = document.getElementById("targetTeamSelect").value;
+  const oldTeam = players[idx].team;
+  if (oldTeam === target) return;
+  players[idx].team = target;
+  hasTraded = true;
+  document.getElementById("tradeLog").innerHTML =
+    `Transfer applied: <strong>${players[idx].name}</strong> moved from <strong>${oldTeam}</strong> to <strong>${target}</strong>. Table updated across 5,000 simulations.`;
+  populateDropdowns();
+  runMonteCarlo(false);
+}
+
+function resetRosters() {
+  players = JSON.parse(JSON.stringify(INITIAL_PLAYERS));
+  hasTraded = false;
+  document.getElementById("tradeLog").innerHTML = "Showing baseline 2008–2026 historical projection (synced with Python output).";
+  populateDropdowns();
+  runMonteCarlo(true);
+}
+
+function calcHeadToHead() {
+  const tA = document.getElementById("matchTeamA").value;
+  const tB = document.getElementById("matchTeamB").value;
+  const strengths = getTeamStrengths();
+  if (tA === tB) {
+    document.getElementById("h2hOutput").innerHTML = `<span style="color:var(--text-muted); font-size:12.5px;">Select two different clubs to compare head-to-head odds.</span>`;
+    return;
+  }
+  const pA = (winProb(tA, tB, strengths) * 100).toFixed(1);
+  const pB = (100 - pA).toFixed(1);
+  document.getElementById("h2hOutput").innerHTML = `
+    <div class="h2h-nums">
+      <span style="color:${TEAM_META[tA].color}">${tA} ${pA}%</span>
+      <span style="color:${TEAM_META[tB].color}">${pB}% ${tB}</span>
+    </div>
+    <div class="h2h-meter">
+      <div style="width:${pA}%; background:${TEAM_META[tA].color}"></div>
+      <div style="width:${pB}%; background:${TEAM_META[tB].color}; opacity:0.75"></div>
+    </div>
+  `;
+}
+
+populateDropdowns();
+runMonteCarlo(true);
+</script>
+</body>
+</html>
